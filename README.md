@@ -19,3 +19,16 @@ setting -> Editor ->  File Types -> Ignored Files and Folders
 - 优点：
   - 隐藏资源的访问行为，无法通过地址得知对资源是何种操作
   - 书写简化
+
+### @RequestBody,@RequestParam和PathVariable的不同使用场景
+- 区别：
+  - @RequestParam用于接收url地址传参或表单传参
+  - @RequestBody用于接收json数据
+  - @PathVariable用于接收路径参数，使用{参数名称}描述路径参数
+- 应用：
+  - 如果接收的数据以json为主，尽量使用@RequestBody
+  - 如果发送非json格式数据，选用@RequestParam接收请求参数
+  - 采用RESTful进行开发，当参数数量较少时，可以使用@PathVariable接收请求路径变量
+
+### @RestController
+- 包含 @Controller 和 @ResponseBody
