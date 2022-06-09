@@ -1,0 +1,36 @@
+server:
+  port: 8081
+
+role:
+  name: "Kindred"
+  age: 1500
+#  job: "打野"
+
+  # 数组
+  hobbies:
+    - "和狼聊天"
+    - "唱歌"
+    - "捉迷藏"
+
+#  friends: [{name: "Gnar",age: 9},{name: "Neeko",age: 16}]
+# 或者
+  friends:
+    - name: "gnar"
+      age: 8
+    - name: "kindred"
+      age: 20
+
+# 使用引号包裹的字符串，其中的转义字符可以生效
+#  tempString: ${role.name}\naer
+  tempString: "${role.name}\naer"
+
+
+# 我现在想把自己写的数据源信息封装为一个对象
+# 1. 创建一个类，用于封装下面的数据
+# 2. 由spring帮我们去加载数据到对象中，一定要告诉spring加载哪些信息
+# 3. 使用的时候从spring中直接获取信息使用
+datasource:
+  driver: com.mysql.jdbc.cj.Driver
+  url: jdbc:mysql://localhost:3306/xxx
+  username: root
+  password: xxxxxx

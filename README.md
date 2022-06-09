@@ -32,3 +32,32 @@ setting -> Editor ->  File Types -> Ignored Files and Folders
 
 ### @RestController
 - 包含 @Controller 和 @ResponseBody
+
+<hr>
+
+## 基础配置
+- SpringBoot中导入对应starter后，提供对应配置属性
+
+### 配置文件优先级
+properties > yml > yaml
+
+## yaml数据格式
+- yaml(YAML Ain't Markup Language)，一种数据序列化格式
+- 优点：
+  - 容易阅读
+  - 容易与脚本语言交互
+  - 以数据为核心，重数据轻格式
+- YAML文件扩展名
+  - .yml(主流)
+  - .yaml
+- yaml语法规则
+  - 大小写敏感
+  - 属性层级关系使用多行描述，每行结尾使用冒号结束
+  - 使用缩进表示层级关系，同层级左侧对齐，只允许使用空格，不允许使用Tab键(IDEA能用是因为做了处理)
+  - 属性值前面加空格(属性名与属性值之间使用 冒号+空格 作为分隔符)
+  - \# 表示注释
+
+## 读取Springboot配置中的数据
+- 使用@Value配置SpEL读取单个数据
+- 使用Environment类的实例对象获取属性，getProperty("xxx.xxx")
+- 使用@ConfigurationProperties注解绑定配置信息到封装类中 ，例如： @ConfigurationProperties(prefix = "datasource")
