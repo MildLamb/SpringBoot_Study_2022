@@ -9,20 +9,26 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.mildlamb</groupId>
-    <artifactId>springboot-03-integration</artifactId>
+    <artifactId>springboot-04-mybatis</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>springboot-03-integration</name>
-    <description>springboot-03-integration</description>
+    <name>springboot-04-mybatis</name>
+    <description>springboot-04-mybatis</description>
     <properties>
         <java.version>1.8</java.version>
     </properties>
     <dependencies>
+        <!-- 导入mybatis相关依赖 -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+            <version>2.2.2</version>
         </dependency>
 
-        <!-- 整合junit -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>runtime</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
