@@ -61,3 +61,17 @@ properties > yml > yaml
 - 使用@Value配置SpEL读取单个数据
 - 使用Environment类的实例对象获取属性，getProperty("xxx.xxx")
 - 使用@ConfigurationProperties注解绑定配置信息到封装类中 ，例如： @ConfigurationProperties(prefix = "datasource")
+
+# Springboot整合
+## SpringBoot整合Junit
+1. 注解名称：@SpringBootTest
+2. 类型：测试类注解
+3. 位置：测试类定义上方
+4. 作用：设置JUnit加载的SpringBoot启动类
+5. 范例：
+```java
+@SpringBootTest(classes = xxx.class)
+```
+6. 注意
+   1. 如果测试类存在于引导类所在包或子包中无需指定引导类
+   2. 测试类如果不存在于引导类所在的包或子包中需要通过classes属性指定引导类
