@@ -11,10 +11,10 @@ spring:
 
 mybatis-plus:
   configuration:
-    # \u6253\u5370\u65E5\u5FD7
+    # MP日志
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
       table-prefix: tb_
-      # \u8BBE\u7F6E id \u7B56\u7565\u4E3A\u6570\u636E\u5E93\u81EA\u589E\u7B56\u7565
+      # id为数据库自增策略
       id-type: auto

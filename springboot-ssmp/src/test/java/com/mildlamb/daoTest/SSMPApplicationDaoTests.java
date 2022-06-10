@@ -1,5 +1,7 @@
-package com.mildlamb;
+package com.mildlamb.daoTest;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mildlamb.dao.BookDao;
@@ -9,10 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SSMPApplicationTests {
+class SSMPApplicationDaoTests {
 
     @Autowired
     private BookDao bookDao;
+
+    @Test
+    void test(){
+        System.out.println(bookDao);
+    }
 
     @Test
     void testSelectById() {
@@ -54,6 +61,27 @@ class SSMPApplicationTests {
         System.out.println(page.getTotal());
         // 获取所有数据
         System.out.println(page.getRecords());
+    }
+
+    @Test
+    void testGetByType(){
+        QueryWrapper<Book> qw = new QueryWrapper<>();
+        // 可以使用链式编程
+        qw.like("name","spring");
+        bookDao.selectList(qw);
+    }
+
+    @Test
+    void testGetByType2(){
+        String condition = "spring";
+        LambdaQueryWrapper<Book> lqw = new LambdaQueryWrapper<Book>();
+        /**
+         * param1 判断条件 如果前面的判断条件结果为true 则MP后续会在预编译的sql中连接后面的模糊查询
+         * param2 得到的数据
+         * param3 模糊查询的条件
+         */
+        lqw.like(condition!=null,Book::getName,condition);
+        bookDao.selectList(lqw);
     }
 
 }
