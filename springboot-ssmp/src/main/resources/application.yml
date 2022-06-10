@@ -1,0 +1,20 @@
+server:
+  port: 80
+
+spring:
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/ssmp?useUnicode=yes&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC
+      username: root
+      password: W2kindred
+
+mybatis-plus:
+  configuration:
+    # \u6253\u5370\u65E5\u5FD7
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      table-prefix: tb_
+      # \u8BBE\u7F6E id \u7B56\u7565\u4E3A\u6570\u636E\u5E93\u81EA\u589E\u7B56\u7565
+      id-type: auto
