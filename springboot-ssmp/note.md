@@ -35,3 +35,28 @@ public class MPConfig {
     }
 }
 ```
+
+## MP实现数据层快速开发
+- 定义接口实现BaseMapper接口
+```java
+@Mapper
+public interface BookDao extends BaseMapper<Book> {
+}
+```
+
+## MP实现业务层快速开发
+- 使用MP提供的业务层通用接口(IService)与业务层通用实现类(ServiceImpl<M,T>)
+- 通用类基础上做功能重载或功能追加
+- 注意重载时不要覆盖原始操作，避免原始提供的功能丢失
+
+- 业务层接口实现IService接口
+```java
+public interface IBookService extends IService<Book> {
+}
+```
+- 业务层接口实现类实现上方定义的接口并继承 ServiceImpl<M,T> , M为数据层接口，T为数据实体类
+```java
+@Service
+public class MPBookServiceImpl extends ServiceImpl<BookDao, Book> implements IBookService {
+}
+```
