@@ -7,6 +7,7 @@ import com.mildlamb.service.IBookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -22,8 +23,10 @@ public class BookController2 {
     }
 
     @PostMapping("/saveBook")
-    public ReturnData saveBook(@RequestBody Book book){
-        return new ReturnData(iBookService.save(book));
+    public ReturnData saveBook(@RequestBody Book book) throws IOException {
+        if (book.getName().equals("123")) throw new IOException();
+        boolean flag = iBookService.save(book);
+        return new ReturnData(flag?"操作成功^_^":"操作失败-_-",flag);
     }
 
     @PutMapping("/updateBook")
