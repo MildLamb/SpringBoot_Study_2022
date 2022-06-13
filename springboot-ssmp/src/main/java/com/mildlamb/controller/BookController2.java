@@ -44,8 +44,24 @@ public class BookController2 {
         return new ReturnData(iBookService.getById(id) != null ? true : false,iBookService.getById(id));
     }
 
+//    @GetMapping("/getPage/{current}/{size}")
+//    public ReturnData getPageBooks(@PathVariable("current") int currentPage,@PathVariable("size") int pageSize){
+//        IPage<Book> page = iBookService.getPage(currentPage, pageSize);
+//        if (currentPage > page.getPages()){
+//            page = iBookService.getPage((int)page.getPages(), pageSize);
+//        }
+//        return new ReturnData(page != null ? true : false,page);
+//    }
+
     @GetMapping("/getPage/{current}/{size}")
-    public ReturnData getPageBooks(@PathVariable("current") int currentPage,@PathVariable("size") int pageSize){
-        return new ReturnData(iBookService.getPage(currentPage,pageSize) != null ? true : false,iBookService.getPage(currentPage,pageSize));
+    public ReturnData getPageBooks(@PathVariable("current") int currentPage,@PathVariable("size") int pageSize,Book book){
+
+        System.out.println("Book ==> " + book);
+
+        IPage<Book> page = iBookService.getPage(currentPage, pageSize,book);
+        if (currentPage > page.getPages()){
+            page = iBookService.getPage((int)page.getPages(), pageSize,book);
+        }
+        return new ReturnData(page != null ? true : false,page);
     }
 }

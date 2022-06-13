@@ -45,6 +45,7 @@ public class SSMPApplicationServiceTest {
     void testGetBookByPage(){
         IPage<Book> mp_page = new Page(1, 5);
         IPage<Book> bookIPage = bookService.page(mp_page);
+
         System.out.println(bookIPage);
     }
 
