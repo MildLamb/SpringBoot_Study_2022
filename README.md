@@ -75,3 +75,67 @@ properties > yml > yaml
 6. 注意
    1. 如果测试类存在于引导类所在包或子包中无需指定引导类
    2. 测试类如果不存在于引导类所在的包或子包中需要通过classes属性指定引导类
+
+
+## Springboot项目快速启动(Windows版)
+1. 对SpringBoot项目打包(执行Maven构建指令package)
+```text
+mvn package
+```
+2. 运行项目(执行启动指令)
+```text
+java -jar springboot.jar
+```
+- 注意事项
+jar支持命令行启动需要依赖maven插件支持，请确认打包时是否具有SpringBoot对应的maven插件
+```xml
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-maven-plugin</artifactId>
+    </plugin>
+  </plugins>
+</build>
+```
+
+# Windows端口被占用
+```bash
+# 查询端口
+netstat -ano
+  协议    本地地址                 外部地址                状态          PID
+  TCP    0.0.0.0:135            0.0.0.0:0              LISTENING       1828
+  TCP    0.0.0.0:445            0.0.0.0:0              LISTENING       4
+# 查询指定端口(类似模糊查询)
+netstat -ano | findstr "端口号"
+# 查询进程列表
+# tasklist
+C:\Users\MildLamb>tasklist
+映像名称                       PID 会话名              会话#       内存使用
+========================= ======== ================ =========== ============
+System Idle Process              0 Services                   0          8 K
+System                           4 Services                   0      3,536 K
+# 查询指定进程号的进程
+# tasklist | findstr "PID"
+C:\Users\MildLamb>tasklist | findstr "5860"
+svchost.exe                   5860 Services                   0     16,660 K
+# 根据指定进程号结束进程
+# taskkill -f -pid "PID"
+
+# 根据指定进程名称结束进程
+# taskkill -f -t -im "进程名称"
+```
+
+## 启动jar包时使用临时属性
+- 带临时属性启动SpringBoot
+- 携带多个属性启动SpringBoot时，属性间使用空格分隔
+```bash
+java -jar xxx.jar --server.port=8080 --xxx.xxx.xxx=xxx
+```
+
+## 配置文件优先级
+1. SpringBoot中4级配置文件
+  - 1级：classpath:application.yml    【优先级最低】               项目类路径下配置文件
+  - 2级：classpath:config/application.yml                         项目类路径config目录中的配置文件
+  - 3级：file:application.yml  (file就是和你jar包同级)             工程路径配置文件
+  - 4级：file:config/application.yml  【优先级最高】               工程路径config目录中的配置文件
