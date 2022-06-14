@@ -1,1 +1,51 @@
+# 公共属性配置，不区分环境的配置写这里
+# 指定使用的环境
+spring:
+  profiles:
+    # 使用分组的话，启动的时候会自动找到对应组环境
+#    active: prod
+
+    # 读取maven中指定的环境名称
+    active: @profile.active@
+
+    group:
+      "dev": devDB,devMVC
+      "prod": prodDB,prodMVC
+#    include: prodMVC
+
+
+
+
+# 单配置文件多环境
+#---
+## 生产环境
+## 指定当前的环境名称
+#spring:
+#  config:
+#    activate:
+#      on-profile: prod
+#
+#server:
+#  port: 80
+#
+#---
+## 开发环境
+#spring:
+#  config:
+#    activate:
+#      on-profile: dev
+#
+#server:
+#  port: 81
+#
+#
+#---
+## 测试环境
+#spring:
+#  config:
+#    activate:
+#      on-profile: test
+#
+#server:
+#  port: 82
 
