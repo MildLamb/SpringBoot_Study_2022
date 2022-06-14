@@ -247,4 +247,85 @@ spring:
     </resources>
 </build>
 ```
-- 如果要更新，尝试使用maven的compile进行手动编译
+- 基于SpringBoot读取Maven配置属性的前提下，如果在Idea下测试工程时，pom.xml每次更新需要手动compile方可生效
+
+<hr>
+
+## 日志基础操作
+- 日志(log)作用
+  - 编程期调试代码
+  - 运营期记录信息
+
+- 如何记录日志
+```java
+@RestController
+public class EnvController {
+    // 创建记录日志的对象
+    private static final Logger log = LoggerFactory.getLogger(EnvController.class);
+
+    @GetMapping("/env")
+    public String getEnv(){
+
+        // 级别由低到高
+        log.debug("debug...");
+        log.info("info...");
+        log.warn("warn...");
+        log.error("error...");
+
+        return "hello";
+    }
+}
+```
+
+- 日志级别
+  - TRACE：运行堆栈信息，使用率低（不常用）
+  - DEBUG：程序员调试代码使用
+  - INFO：记录运维过程数据
+  - WARN：记录运维过程报警数据
+  - ERROR：记录错误堆栈信息
+  - FATAL：灾难信息，合并计入ERROR（不常用）
+
+- 设置日志级别
+```yml
+# 设置日志级别，输出调试信息，常用于检查系统运行状况
+logging:
+  level:
+    root: warn
+    # 设置某个包的日志级别
+    com.mildlamb.controller: debug
+    # 设置指定组的日志级别
+    wildwolf: warn
+
+  # 设置组的日志级别
+  # 设置分组，对某个组设置日志级别
+  group:
+    wildwolf: com.mildlamb.controller,com.mildlamb.dao
+
+# 开启debug模式，输出调试信息，常用于检查系统运行状况
+debug: true
+```
+
+## 日志格式控制
+```text
+        时间              级别  PID           所属线程               所属类/接口名                                     日志信息
+2022-06-14 17:08:49.140  INFO 15568 --- [           main] com.mildlamb.Springboot08LogApplication  : Starting Springboot08LogApplication using Java 1.8.0_221 on LAPTOP-AP9E7L32 with PID 15568 (C:\Code_Study\IDEA\SpringBoot_Study_2022\springboot-08-log\target\classes started by MildLamb in C:\Code_Study\IDEA\SpringBoot_Study_2022)
+2022-06-14 17:08:49.142  INFO 15568 --- [           main] com.mildlamb.Springboot08LogApplication  : No active profile set, falling back to 1 default profile: "default"
+2022-06-14 17:08:49.712  INFO 15568 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+2022-06-14 17:08:49.718  INFO 15568 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2022-06-14 17:08:49.718  INFO 15568 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.63]
+2022-06-14 17:08:49.800  INFO 15568 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2022-06-14 17:08:49.800  INFO 15568 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 630 ms
+2022-06-14 17:08:49.994  INFO 15568 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+2022-06-14 17:08:50.000  INFO 15568 --- [           main] com.mildlamb.Springboot08LogApplication  : Started Springboot08LogApplication in 1.199 seconds (JVM running for 1.694)
+```
+- 设置日志输出格式
+```yaml
+logging:
+  # 设置日志的模板格式
+  # %d - 时间，%m - 消息，注意要使用引号，%clr(%5p) clr表示使用彩色 , %5p - %p表示打印日志等级，5表示占用多少位置，%t - 所属线程，%n - 换行显式
+  pattern:
+#    console: "%d - %m %n"
+    console: "%d %clr(%5p) --- [%16t] %clr(%-20c){cyan} : %m %n"
+```
+
+## 文件记录日志
