@@ -328,4 +328,64 @@ logging:
     console: "%d %clr(%5p) --- [%16t] %clr(%-20c){cyan} : %m %n"
 ```
 
-## 文件记录日志
+<hr>
+
+## 启用热部署
+### 手动启动热部署
+- 依赖的坐标
+```xml
+<!-- 热部署工具 -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-devtools</artifactId>
+</dependency>
+```
+- 手动激活热部署 手动 build project ， 快捷键 ctrl+F9
+- 关于热部署：
+  - 重启(Restart)：开发的代码，包含类，页面，配置文件等，加载位置restart类加载器
+  - 重载(ReLoad)：jar包，加载位置base类加载器
+
+
+### IDEA自动启动热部署
+1. File --> setting --> build --> compiler --> 勾选 build project automatically
+2. File --> Advanced Settings --> 勾选 Allow auto-make to start when ... 
+3. 热部署延迟参数配置 ，快捷键 ctrl + shift + alt + / ， 选择 register
+
+### 热部署范围配置
+- 默认不触发热部署的目录列表
+  - /META-INF/maven
+  - /META-INF/resource
+  - /resources
+  - /static
+  - /public
+  - /template
+- 自定义重启排除项
+```yaml
+spring:
+  devtools:
+    restart:
+      # 设置不参与热部署的文件夹或文件
+      exclude: static/**,public/**,config/application.yml
+```
+
+### 关闭热部署
+- 配置文件级别设置关闭热部署
+```yaml
+spring:
+  devtools:
+    restart:
+      # 在启动类添加系统属性，防止其他更高级别配置文件修改热部署开关
+      enabled: false
+```
+- 系统属性级别关闭热部署，在启动类中(也适用于其他属性的高优先级配置)
+```java
+@SpringBootApplication
+public class Springboot09HotApplication {
+
+    public static void main(String[] args) {
+        // 在系统级别设置关闭热部署
+        System.setProperty("spring.devtools.restart.enabled","false");
+        SpringApplication.run(Springboot09HotApplication.class, args);
+    }
+}
+```
