@@ -487,3 +487,54 @@ public class ServerConfig {
     private int port;
 }
 ```
+
+## 为测试环境添加属性
+- 在启动测试环境时可以通过properties参数设置测试环境专用的属性
+```java
+// properties属性可以为当前测试用例添加临时的属性配置
+//@SpringBootTest(properties = {"test.prop = kindred"})
+
+// args属性也可以为当前的测试环境添加临时属性， 使用 -- ，但properties优先级更高
+@SpringBootTest(properties = {"test.prop = Gnar"} , args = {"--test.prop = Kindred"})
+class PropertiesAndArgsTest {
+
+    @Value("${test.prop}")
+    private String testVal;
+
+    @Test
+    void testProperties() {
+        System.out.println(testVal);
+    }
+
+}
+```
+- 优势：比多环境开发中的测试环境影响的范围更小，仅对当前测试类有效
+
+
+
+## 为测试环境添加临时bean
+- 使用@Import注解导入bean到当前测试环境
+```java
+@SpringBootTest
+@Import({MsgConfig.class})
+public class ConfigurationTest {
+    @Autowired
+    private String msg;
+
+    @Test
+    void test(){
+        System.out.println(msg);
+    }
+}
+```
+
+## 测试类使用web环境测试
+```java
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class WebTest {
+    @Test
+    void testWeb(){
+
+    }
+}
+```
