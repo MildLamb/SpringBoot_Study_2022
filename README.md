@@ -58,6 +58,17 @@ properties > yml > yaml
   - 使用缩进表示层级关系，同层级左侧对齐，只允许使用空格，不允许使用Tab键(IDEA能用是因为做了处理)
   - 属性值前面加空格(属性名与属性值之间使用 冒号+空格 作为分隔符)
   - \# 表示注释
+- 字面值表达方式
+```text
+boolean: TRUE                                # TRUE,true,True,FALSE,false,False均可
+float: 3.14                                  # 6.8523015e+5  # 支持科学计数法
+int: 123                                     # 支持二进制，八进制，十六进制
+null: ~                                      # 使用~表示null
+string: HelloWorld                           # 字符串可以直接书写
+string2: "HelloWorld"                        # 可以使用双引号包裹特殊字符
+date: 2022-06-16                             # 日期默认使用 yyyy-MM-dd 格式
+datetime: 2022-06-16T11:12:35+08:00          # 时间和日期之间使用T连接，最后使用+代表时区
+```
 
 ## 读取Springboot配置中的数据
 - 使用@Value配置SpEL读取单个数据
@@ -387,5 +398,92 @@ public class Springboot09HotApplication {
         System.setProperty("spring.devtools.restart.enabled","false");
         SpringApplication.run(Springboot09HotApplication.class, args);
     }
+}
+```
+
+<hr>
+
+## 第三方bean属性绑定
+- 使用@ConfigurationProperties为第三方bean绑定属性
+```java
+@Bean
+@ConfigurationProperties(prefix = "datasource")
+public DruidDataSource dataSource(){
+DruidDataSource ds = new DruidDataSource();
+return ds;
+}
+```
+- @EnableConfigurationProperties
+  - @EnableConfigurationProperties注解可以将使用@ConfigurationProperties注解对应的类加入Spring容器中
+```java
+@SpringBootApplication
+@EnableConfigurationProperties({ServerConfig.class})
+public class Springboot10ConfigurationApplication {
+}
+```
+```java
+@Data
+@ConfigurationProperties(prefix = "server-config")
+public class ServerConfig {
+    private String ipAddress;
+    private int port;
+    private long timeout;
+}
+```
+- 注意事项：@EnableConfigurationProperties会将参数中的class实例化bean放入spring容器中
+
+## 松散绑定
+- @ConfigurationProperties绑定属性支持属性名松散绑定
+```yaml
+server-config:
+  port: 8081
+#   ip_address: 192.168.1.112   # unlined
+  # ipAddress: 192.168.1.111    # 驼峰
+  ip-address: 192.168.1.113     # 烤肉串模式
+#  IPADDRESS: 192.168.101.1
+#  IP_ADDRESS: 192.168.101.1    # 常量模式
+```
+- @Value不支持松散绑定
+- 绑定前缀(prefix)的命名规范：仅能使用纯小写字母，数字，下划线作为合法的字符
+
+## 常用计量单位
+```java
+@Data
+@ConfigurationProperties(prefix = "server-config")
+public class ServerConfig {
+    // 时间类型 Duration
+    // 指定时间单位
+    @DurationUnit(ChronoUnit.MINUTES)
+    private Duration serverTimeOut;
+
+    // 容量类型
+    @DataSizeUnit(DataUnit.MEGABYTES)
+    private DataSize dataSize;
+}
+```
+```yaml
+server-config:
+  server-timeout: 3
+  data-size: 1024
+```
+
+## bean属性校验
+1. 导入JSR303校验规范
+```xml
+<!-- 导入JSR303校验启动器 -->
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+```
+2. 开启校验功能，制定校验规则
+```java
+// 开启对当前bean的属性校验
+@Validated
+public class ServerConfig {
+    // 制定校验规则
+    @Max(value = 8888,message = "最大值不能超过8888")
+    @Min(value = 0,message = "最小值不能低于0")
+    private int port;
 }
 ```

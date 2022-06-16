@@ -1,0 +1,14 @@
+server-config:
+  port: 0
+  ip_address: 192.168.1.112   # unlined
+  # ipAddress: 192.168.1.111    # 驼峰
+#  ip-address: 192.168.1.113     # 烤肉串模式
+#  IPADDRESS: 192.168.101.1
+#  IP_ADDRESS: 192.168.101.1    # 常量模式
+  timeout: 5
+  server-timeout: 3
+  data-size: 1024
+
+datasource:
+  driverClassName: com.mysql.cj.jdbc.driver
+  password: "0127"
