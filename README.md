@@ -538,3 +538,142 @@ public class WebTest {
     }
 }
 ```
+
+## web环境模拟测试
+- 虚拟请求测试
+```java
+// 开启虚拟MVC调用
+@AutoConfigureMockMvc
+public class WebTest {
+    @Test
+    void testWeb(){
+
+    }
+
+    @Test
+    // 注入虚拟MVC调用对象
+    void testMVC(@Autowired MockMvc mockMvc) throws Exception {
+        // localhost:8080/role/info
+        // 创建虚拟请求，当前访问 /role/info
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/role/info");
+        // 执行对应的虚拟请求
+        mockMvc.perform(builder);
+    }
+}
+```
+
+### 虚拟请求状态匹配
+```java
+@Test
+void testStatus(@Autowired MockMvc mvc) throws Exception{
+    // 创建虚拟请求，当前访问 /role/info
+    MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/role/info");
+    // 执行对应的虚拟请求
+    ResultActions resultActions = mvc.perform(builder);
+
+    // 设定预期值，与真实值进行比较，成功则测试通过，失败则测试不通过
+    // 定义本次调用的预期值
+    StatusResultMatchers status = MockMvcResultMatchers.status();
+    // 预计本次调用是成功的，状态200
+    ResultMatcher statusOk = status.isOk();
+    // 添加预计值到本次调用过程中进行匹配
+    resultActions.andExpect(statusOk);
+    }
+```
+
+### 虚拟响应体匹配
+```java
+@Test
+void testRespBody(@Autowired MockMvc mvc) throws Exception{
+    MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/role/info");
+    ResultActions resultActions = mvc.perform(builder);
+
+    // 设定预期值，与真实值进行比较，成功则测试通过，失败则测试不通过
+    // 定义本次调用的预期值
+    ContentResultMatchers content = MockMvcResultMatchers.content();
+    // 预计本次虚拟调用返回的结果是
+    ResultMatcher respInfo = content.string("这是珏宝的一些信息");
+    // 添加预计值到本次调用过程中进行匹配
+    resultActions.andExpect(respInfo);
+
+}
+```
+
+### 虚拟响应体匹配(JSON)
+```java
+@Test
+void testJson(@Autowired MockMvc mvc) throws Exception{
+    MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/role/myrole");
+    ResultActions resultActions = mvc.perform(builder);
+
+    // 设定预期值，与真实值进行比较，成功则测试通过，失败则测试不通过
+    // 定义本次调用的预期值
+    ContentResultMatchers content = MockMvcResultMatchers.content();
+    // 预计响应的json结果
+    String jsonResp = "{\"name\":\"Gnar\",\"age\":1500}";
+    // 预计本次虚拟调用返回的结果是
+    ResultMatcher respInfo = content.json(jsonResp);
+    // 添加预计值到本次调用过程中进行匹配
+    resultActions.andExpect(respInfo);
+
+}
+```
+
+### 响应头类型匹配
+```java
+@Test
+void testContentType(@Autowired MockMvc mvc) throws Exception{
+    MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get("/role/info");
+    ResultActions resultActions = mvc.perform(builder);
+
+    // 设定预期值，与真实值进行比较，成功则测试通过，失败则测试不通过
+    // 定义本次调用的预期值
+    HeaderResultMatchers header = MockMvcResultMatchers.header();
+    ResultMatcher contextType = header.string("Content-Type", "application/json");
+    // 添加预计值到本次调用过程中进行匹配
+    resultActions.andExpect(contextType);
+
+}
+```
+
+<hr>
+
+## 数据层测试事务回滚
+- 为测试用例添加事务(@Transactional)，Springboot会对测试用例对应的事务提交操作进行回滚
+```java
+@SpringBootTest
+
+// spring事务的注解
+@Transactional  // 默认事务是回滚的
+//@Rollback(value = false)  // 关闭回滚
+public class DBTest {
+    @Autowired
+    private RoleController controller;
+
+    @Test
+    void testSave(){
+        controller.saveRole("千珏",1500);
+    }
+}
+```
+- 如果想在测试用例中提交事务，可以通过@Rollback注解设置
+
+## 随机测试数据设定
+```yaml
+testdata:
+  role:
+    id: ${random.int}          # 随机整数
+    id2: ${random.int(100)}    # 100以内的正数
+    type: ${random.int(1,9)}   # 1-9随机整数
+    name: ${random.value}      # 随机字符串，MD5字符串，32位
+    uuid: ${random.uuid}       # 随机uuid
+    role-time: ${random.long}  # 随机整数(long范围)
+```
+
+<hr>
+
+## 数据源配置
+- Springboot提供了3种内嵌的数据源对象供开发者使用
+  - HikariCP：默认内置数据源对象
+  - Tomcat提供DataSource：HikariCP不可用的情况下，且在web环境中，将使用tomcat服务器配置的数据源对象
+  - Commons DBCP：Hikari不可用，tomcat数据源也不可用，将使用dbcp数据源
