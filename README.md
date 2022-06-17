@@ -672,8 +672,44 @@ testdata:
 
 <hr>
 
-## 数据源配置
+## springboot内置数据源配置
 - Springboot提供了3种内嵌的数据源对象供开发者使用
   - HikariCP：默认内置数据源对象
   - Tomcat提供DataSource：HikariCP不可用的情况下，且在web环境中，将使用tomcat服务器配置的数据源对象
   - Commons DBCP：Hikari不可用，tomcat数据源也不可用，将使用dbcp数据源
+
+## springboot内置的持久层配置
+- JdbcTemplate
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-jdbc</artifactId>
+</dependency>
+```
+
+## springboot内嵌h2数据库
+- 依赖坐标
+```xml
+<!-- H2数据库 -->
+<dependency>
+    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+</dependency>
+```
+- h2配置
+```yaml
+# h2数据库,内嵌数据库
+# 配置h2数据库控制台
+spring:
+  h2:
+    console:
+      path: /h2
+      enabled: true
+
+  # 第一次运行h2初始化数据
+  datasource:
+    url: jdbc:h2:~/test
+    username: root
+    password: 123456
+    driver-class-name: org.h2.Driver
+```
