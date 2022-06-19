@@ -704,7 +704,7 @@ spring:
   h2:
     console:
       path: /h2
-      enabled: true
+      enabled: true   # 上线的时候记得关闭
 
   # 第一次运行h2初始化数据
   datasource:
@@ -713,3 +713,51 @@ spring:
     password: 123456
     driver-class-name: org.h2.Driver
 ```
+
+<hr>
+
+# SpringBoot整合Redis
+- 导入Springboot整合Redis的坐标
+```xml
+ <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+```
+- 配置redis
+```yaml
+spring:
+  redis:
+    host: xxx.xxx.xxx.xxx
+    port: 6379
+    password: xxxxxxxxx
+```
+- 使用API
+```java
+@SpringBootTest
+class Springboot13RedisApplicationTests {
+
+    @Resource
+    private RedisTemplate redisTemplate;
+
+    @Test
+    void getRedis() {
+        // 声明要操作那种数据类型
+        ValueOperations ops = redisTemplate.opsForValue();
+        Object age = ops.get("age");
+        System.out.println(age);
+    }
+
+    @Test
+    void setRedis(){
+        // 声明要操作那种数据类型
+        ValueOperations ops = redisTemplate.opsForValue();
+        ops.set("age",1500);
+    }
+}
+```
+
+<hr>
+
+# Springboot整合Mongodb
+- MongoDb是一个开源，高性能，无模式的文档型数据库。NoSQL数据库产品中的一种，是最像关系型数据库的非关系型数据库
