@@ -765,6 +765,31 @@ class Springboot13RedisApplicationTests {
 
 # Springboot整合ES
 ## ElasticSearch(ES)
+- 创建索引，添加条件  PUT
+```json
+{
+    "mappings":{
+        "properties":{
+            "id":{
+                "type":"keyword",
+                "copy_to":"all"
+            },
+            "name":{
+                "type":"text",
+                "analyzer":"ik_max_word",
+                "copy_to":"all"
+            },
+            "age":{
+                "type":"integer"
+            },
+            "all":{
+                "type":"text",
+                "analyzer":"ik_max_word"
+            }
+        }
+    }
+}
+```
 - 创建文档(数据)
 ```text
 POST        http://localhost:9200/roles/_doc          # 使用系统生成id
@@ -834,8 +859,106 @@ class Springboot15EsApplicationTests {
 
         // 创建一个名为roles的索引
         CreateIndexRequest request = new CreateIndexRequest("roles");
+        // ES客户端执行创建索引的请求
         restHighLevelClient.indices().create(request, RequestOptions.DEFAULT);
 
     }
+```
 
+- 创建带参数的索引
+```java
+    @Test
+    void testCreateIndexByIK() throws IOException {
+        CreateIndexRequest request = new CreateIndexRequest("roles");
+        // 设置请求的参数
+        String json = "{\n" +
+                "    \"mappings\":{\n" +
+                "        \"properties\":{\n" +
+                "            \"id\":{\n" +
+                "                \"type\":\"keyword\",\n" +
+                "                \"copy_to\":\"all\"\n" +
+                "            },\n" +
+                "            \"name\":{\n" +
+                "                \"type\":\"text\",\n" +
+                "                \"analyzer\":\"ik_max_word\",\n" +
+                "                \"copy_to\":\"all\"\n" +
+                "            },\n" +
+                "            \"age\":{\n" +
+                "                \"type\":\"integer\"\n" +
+                "            },\n" +
+                "            \"all\":{\n" +
+                "                \"type\":\"text\",\n" +
+                "                \"analyzer\":\"ik_max_word\"\n" +
+                "            }\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
+        request.source(json, XContentType.JSON);
+        restHighLevelClient.indices().create(request, RequestOptions.DEFAULT);
+    }
+
+```
+- 添加文档(单个和多个)
+```java
+    @Test
+    void testCreateDoc() throws IOException {
+
+        /*
+            一次插入一条数据
+         */
+/*        Role role = roleDao.selectById(1);
+
+        IndexRequest request = new IndexRequest("roles").id(role.getId().toString());
+        String json = JSON.toJSONString(role);
+        request.source(json,XContentType.JSON);
+        restHighLevelClient.index(request,RequestOptions.DEFAULT);*/
+
+        /*
+            批处理插入数据
+         */
+        List<Role> roles = roleDao.selectList(null);
+
+        // 创建批处理请求 容器
+        BulkRequest bulk = new BulkRequest();
+
+        // 通过循环 将请求添加到容器中，准备一次执行
+        for (Role role : roles) {
+            IndexRequest request = new IndexRequest("roles").id(role.getId().toString());
+            String json = JSON.toJSONString(role);
+            request.source(json,XContentType.JSON);
+            bulk.add(request);
+        }
+        restHighLevelClient.bulk(bulk,RequestOptions.DEFAULT);
+
+    }
+```
+- 查询文档
+```java
+    @Test
+    // 按文档id查询
+    void testGetByDocId() throws IOException {
+        GetRequest getRrequest = new GetRequest("roles","1");
+        GetResponse documentFields = restHighLevelClient.get(getRrequest, RequestOptions.DEFAULT);
+        String result = documentFields.getSourceAsString();
+        System.out.println(result);
+
+    }
+
+
+    @Test
+    // 按条件查询
+    void testGetByQuery() throws IOException {
+        SearchRequest searchRequest = new SearchRequest("roles");
+        // 创建查询条件
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+        builder.query(QueryBuilders.termQuery("name","kindred"));
+        searchRequest.source(builder);
+        SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+        SearchHits hits = response.getHits();
+        for (SearchHit hit : hits) {
+            String result = hit.getSourceAsString();
+            Role role = JSON.parseObject(result,Role.class);
+            System.out.println(role);
+        }
+    }
 ```
