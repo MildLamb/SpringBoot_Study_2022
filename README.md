@@ -761,3 +761,81 @@ class Springboot13RedisApplicationTests {
 
 # Springboot整合Mongodb
 - MongoDb是一个开源，高性能，无模式的文档型数据库。NoSQL数据库产品中的一种，是最像关系型数据库的非关系型数据库
+- 整合后的使用方法与Redis类似
+
+# Springboot整合ES
+## ElasticSearch(ES)
+- 创建文档(数据)
+```text
+POST        http://localhost:9200/roles/_doc          # 使用系统生成id
+POST        http://localhost:9200/roles/_create/1     # 使用指定id
+POST        http://localhost:9200/roles/_doc/1        # 使用指定id，不存在则创建，存在则更新(会导致版本号更新)
+请求体携带json数据
+```
+- 查询文档
+```text
+GET         http://localhost:9200/roles/_doc/1        # 查询单个文档
+GET         http://localhost:9200/roles/_search       # 查询所有文档
+```
+- 条件查询
+```text
+GET         http://localhost:9200/roles/_search?q=name:xxx
+```
+- 删除文档
+```text
+DELECT      http://localhost:9200/books/_doc/1
+```
+- 修改文档(全量修改)
+```text
+PUT         http://localhost:9200/roles/_doc/1
+请求体携带json数据
+```
+- 文档修改(部分修改)
+```text
+POST        http://localhost:9200/roles/_update/1
+{
+    "doc":{
+        "paramName":"newValue"
+    }
+}
+```
+## 整合ES
+- 导入坐标
+```xml
+<!-- 高级别ES客户端 -->
+<dependency>
+    <groupId>org.elasticsearch.client</groupId>
+    <artifactId>elasticsearch-rest-high-level-client</artifactId>
+</dependency>
+```
+- 测试使用
+```java
+@SpringBootTest
+class Springboot15EsApplicationTests {
+
+    // 显式已弃用
+    @Autowired
+    private RestHighLevelClient restHighLevelClient;
+
+    @BeforeEach
+    void beforeTest(){
+        HttpHost host = HttpHost.create("http://localhost:9200");
+        RestClientBuilder builder = RestClient.builder(host);
+        restHighLevelClient = new RestHighLevelClient(builder);
+    }
+
+    @AfterEach
+    void AfterTest() throws IOException {
+        restHighLevelClient.close();
+    }
+
+    @Test
+    void testCreateIndex() throws IOException {
+
+        // 创建一个名为roles的索引
+        CreateIndexRequest request = new CreateIndexRequest("roles");
+        restHighLevelClient.indices().create(request, RequestOptions.DEFAULT);
+
+    }
+
+```
