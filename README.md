@@ -962,3 +962,39 @@ class Springboot15EsApplicationTests {
         }
     }
 ```
+
+<hr>
+
+# 缓存
+- 缓存是一种介于数据永久存储介质与数据应用之间的数据临时存储介质
+- 使用缓存可以有效的减少低速数据读取过程的次数(例如磁盘IO)，提高系统新能
+- 缓存不仅可以用于提高永久性存储介质的数据读取效率，还可以提供临时的数据存储空间
+
+## Springboot的缓存
+- 导入springboot的缓存依赖
+```xml
+<!-- springboot缓存依赖 -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-cache</artifactId>
+</dependency>
+```
+- 启用缓存
+```java
+@SpringBootApplication
+// 开启缓存
+@EnableCaching
+public class Springboot16Cache {
+    public static void main(String[] args) {
+        SpringApplication.run(Springboot16Cache.class,args);
+    }
+}
+```
+- 使用缓存
+```java
+// value指定缓存名称  key指定缓存中的键  #paramName可以取到对应参数
+@Cacheable(value = "cacheSpace",key = "#rid")
+public Role getRoleById(Integer rid) {
+    return roleDao.selectById(rid);
+} 
+```
