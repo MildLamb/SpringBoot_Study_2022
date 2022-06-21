@@ -8,6 +8,54 @@ spring:
 
 
 
+
+
+# 自定义memcached属性
+memcached:
+  servers: localhost:11211
+  poolSize: 10
+  opTimeout: 3000
+
+
+
+
+  # 指定使用 ehcacahe
+#  cache:
+#    type: ehcache
+
+
+
+
+
+
+
+
+
+  # 指定使用 Redis
+#  cache:
+#    type: redis
+#    redis:
+#      use-key-prefix: true
+#      key-prefix:
+      # 有效时长
+#      time-to-live: 10s
+#
+#  redis:
+#    host: 150.158.46.233
+#    port: 6379
+#    password: mildlambW2kindredwildwolfW2snowgnar
+
+
+
+
+
+
+
+
+
+
+
+
 mybatis-plus:
   configuration:
     # MP\u65E5\u5FD7

@@ -998,3 +998,163 @@ public Role getRoleById(Integer rid) {
     return roleDao.selectById(rid);
 } 
 ```
+
+## 变更缓存供应商 使用ehcache
+- 添加Ehcache坐标
+```xml
+<!-- Ehcache -->
+<dependency>
+    <groupId>net.sf.ehcache</groupId>
+    <artifactId>ehcache</artifactId>
+    <version>2.10.4</version>
+</dependency>
+```
+- 配置文件中设置使用Ehcache
+```yml
+spring:
+  # 指定使用 ehcacahe
+  cache:
+    type: ehcache
+```
+- 编写Ehcache配置文件(ehcache.xml)
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
+         updateCheck="false">
+    <!--
+       diskStore：为缓存路径，ehcache分为内存和磁盘两级，此属性定义磁盘的缓存位置。参数解释如下：
+       user.home – 用户主目录
+       user.dir  – 用户当前工作目录
+       java.io.tmpdir – 默认临时文件路径
+     -->
+    <diskStore path="C:\ehcache"/>
+    <!--
+       defaultCache：默认缓存策略，当ehcache找不到定义的缓存时，则使用这个缓存策略。只能定义一个。
+     -->
+    <!--
+      name:缓存名称。
+      maxElementsInMemory:缓存最大数目
+      maxElementsOnDisk：硬盘最大缓存个数。
+      eternal:对象是否永久有效，一但设置了，timeout将不起作用。
+      overflowToDisk:是否保存到磁盘，当系统当机时
+      timeToIdleSeconds:设置对象在失效前的允许闲置时间（单位：秒）。仅当eternal=false对象不是永久有效时使用，可选属性，默认值是0，也就是可闲置时间无穷大。
+      timeToLiveSeconds:设置对象在失效前允许存活时间（单位：秒）。最大时间介于创建时间和失效时间之间。仅当eternal=false对象不是永久有效时使用，默认是0.，也就是对象存活时间无穷大。
+      diskPersistent：是否缓存虚拟机重启期数据 Whether the disk store persists between restarts of the Virtual Machine. The default value is false.
+      diskSpoolBufferSizeMB：这个参数设置DiskStore（磁盘缓存）的缓存区大小。默认是30MB。每个Cache都应该有自己的一个缓冲区。
+      diskExpiryThreadIntervalSeconds：磁盘失效线程运行时间间隔，默认是120秒。
+      memoryStoreEvictionPolicy：当达到maxElementsInMemory限制时，Ehcache将会根据指定的策略去清理内存。默认策略是LRU（最近最少使用）。你可以设置为FIFO（先进先出）或是LFU（较少使用）。
+      clearOnFlush：内存数量最大时是否清除。
+      memoryStoreEvictionPolicy:可选策略有：LRU（最近最少使用，默认策略）、FIFO（先进先出）、LFU（最少访问次数）。
+      FIFO，first in first out，这个是大家最熟的，先进先出。
+      LFU， Less Frequently Used，就是上面例子中使用的策略，直白一点就是讲一直以来最少被使用的。如上面所讲，缓存的元素有一个hit属性，hit值最小的将会被清出缓存。
+      LRU，Least Recently Used，最近最少使用的，缓存的元素有一个时间戳，当缓存容量满了，而又需要腾出地方来缓存新的元素的时候，那么现有缓存元素中时间戳离当前时间最远的元素将被清出缓存。
+   -->
+    <defaultCache
+            eternal="false"
+            maxElementsInMemory="10000"
+            overflowToDisk="false"
+            diskPersistent="false"
+            timeToIdleSeconds="60"
+            timeToLiveSeconds="60"
+            memoryStoreEvictionPolicy="LRU"/>
+
+    <!--  name要和@Cacheable的value属性对应，就是哪一部分缓存存入哪个缓存空间   -->
+    <cache
+            name="smsCheckCode"
+            eternal="false"
+            maxElementsInMemory="5000"
+            overflowToDisk="false"
+            diskPersistent="false"
+            timeToIdleSeconds="10"
+            timeToLiveSeconds="10"
+            memoryStoreEvictionPolicy="LRU"/>
+
+</ehcache>
+```
+
+# memcached下载安装
+- 下载百度，去菜鸟下载
+- 安装memcached
+  - 使用管理员身份运行cmd指令,进入memcached目录
+  - 输入  memcached.exe -d install
+  - 启动/停止  memcached.exe -d start/stop
+
+## springboot整合memcached
+- 导入memcached依赖
+```xml
+<!-- memcached -->
+<dependency>
+    <groupId>com.googlecode.xmemcached</groupId>
+    <artifactId>xmemcached</artifactId>
+    <version>2.4.7</version>
+</dependency>
+```
+- 配置memcached服务器的一些属性(名称自定义，使用读取配置的方式进行)
+```yaml
+# 自定义memcached属性
+memcached:
+  # memcached服务器地址
+  servers: localhost:11211
+  # 连接池数量
+  poolSize: 10
+  # 设置超时时间
+  opTimeout: 3000
+```
+- 创建读取配置属性的信息类，加载上面的配置
+```java
+@Component
+@Data
+@ConfigurationProperties(prefix = "memcached")
+public class XMemcachedProperties {
+    private String servers;
+    private int poolSize;
+    private long opTimeout;
+}
+```
+- 创建memcached客户端
+```java
+@Configuration
+public class XMemcached {
+
+    @Autowired
+    private XMemcachedProperties properties;
+
+    @Bean
+    public MemcachedClient getMemcachedClient() throws IOException {
+        MemcachedClientBuilder memcachedClientBuilder = new XMemcachedClientBuilder(properties.getServers());
+        memcachedClientBuilder.setOpTimeout(properties.getOpTimeout());
+        MemcachedClient memcachedClient = memcachedClientBuilder.build();
+        return memcachedClient;
+    }
+}
+```
+- 使用memcached缓存
+```java
+    @Autowired
+    private MemcachedClient memcachedClient;
+
+    @Override
+    public String sendCodeToSMS(String tele) {
+        String generator = CodeUtil.generator(tele);
+        // 参数分别为   键 过期时间(0表示永不过期) 值
+        try {
+            memcachedClient.set(tele,10,generator);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return generator;
+    }
+
+    @Override
+    public boolean checkCode(SMSCode smsCode){
+        String CacheCode = null;
+        try {
+            CacheCode = memcachedClient.get(smsCode.getTele()).toString();
+            System.out.println("=================== " + CacheCode);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return smsCode.getCode().equals(CacheCode);
+    }
+```
