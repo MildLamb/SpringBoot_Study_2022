@@ -1302,3 +1302,105 @@ jetcache:
       valueEncode: java
       valueDecode: java
 ```
+
+# j2cache实现缓存
+- 导入依赖(由于Springboot已经导入了slf4j，因此j2cache-core中要排除slf4j)
+```xml
+<!-- 下面两个是j2cache所需依赖 -->
+
+<dependency>
+    <groupId>net.oschina.j2cache</groupId>
+    <artifactId>j2cache-spring-boot2-starter</artifactId>
+    <version>2.8.0-release</version>
+</dependency>
+
+<dependency>
+    <groupId>net.oschina.j2cache</groupId>
+    <artifactId>j2cache-core</artifactId>
+    <version>2.8.5-release</version>
+    <exclusions>
+        <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </exclusion>
+        <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </exclusion>
+    </exclusions>
+
+</dependency>
+
+<!-- ehcache -->
+<dependency>
+    <groupId>net.sf.ehcache</groupId>
+    <artifactId>ehcache</artifactId>
+    <version>2.10.4</version>
+</dependency>
+```
+- 配置j2cache
+```yaml
+# j2cache配置
+j2cache:
+  config-location: j2cache.properties
+```
+- 编写ehcache(ehcache.xml)配置文件
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
+         updateCheck="false">
+
+    <diskStore path="C:\ehcache"/>
+
+    <defaultCache
+            eternal="false"
+            maxElementsInMemory="10000"
+            overflowToDisk="false"
+            diskPersistent="false"
+            timeToIdleSeconds="60"
+            timeToLiveSeconds="60"
+            memoryStoreEvictionPolicy="LRU"/>
+
+</ehcache>
+```
+- 编写j2cache(j2cache.properties)配置文件
+```properties
+# 1级缓存
+j2cache.L1.provider_class = ehcache
+ehcache.configXml = ehcache.xml
+
+# 2级缓存
+j2cache.L2.provider_class = net.oschina.j2cache.cache.support.redis.SpringRedisProvider
+j2cache.L2.config_section = redisConf
+redisConf.hosts = 150.158.46.233:6379
+redisConf.password = mildlambW2kindredwildwolfW2snowgnar
+
+# 1级缓存中的数据如何到达2级缓存
+j2cache.broadcast = net.oschina.j2cache.cache.support.redis.SpringRedisPubSubPolicy
+```
+- 使用j2cache
+```java
+@Service
+public class SMSCodeServiceImpl implements SMSCodeService {
+
+    // 创建j2cache缓存对象
+    @Autowired
+    private CacheChannel cacheChannel;
+
+    @Override
+    public String sendCodeToSMS(String tele) {
+        // 生成验证码
+        String code = CodeUtil.generator(tele);
+        // 缓存空间名  键  值
+        cacheChannel.set("sms",tele,code);
+        return code;
+    }
+
+    @Override
+    public boolean checkCode(SMSCode smsCode){
+        String CacheCode = cacheChannel.get("sms",smsCode.getTele()).asString();
+        return smsCode.getCode().equals(CacheCode);
+    }
+}
+```
