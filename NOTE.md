@@ -1158,3 +1158,72 @@ public class XMemcached {
         return smsCode.getCode().equals(CacheCode);
     }
 ```
+
+# jetCache
+## jetcache远程缓存方案
+- 导入依赖
+```xml
+<!-- jetcacahe -->
+<dependency>
+    <groupId>com.alicp.jetcache</groupId>
+    <artifactId>jetcache-starter-redis</artifactId>
+    <version>2.6.4</version>
+</dependency>
+```
+- 启动类开启缓存注解
+```java
+@SpringBootApplication
+// jetcacahe启用缓存的主开关
+@EnableCreateCacheAnnotation
+public class Springboot17JetcacheApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Springboot17JetcacheApplication.class, args);
+    }
+}
+```
+- 编写jetcache配置，使用远程redis
+```yaml
+# jetcacahe配置
+jetcache:
+  remote:
+    default:
+      type: redis
+      host: xxx.xxx.xxx.xxx
+      port: 6379
+      password: myredispwd
+      poolConfig:
+        maxTotal: 50
+
+    sms:
+      type: redis
+      host: xxx.xxx.xxx.xxx
+      port: 6379
+      password: myredispwd
+      poolConfig:
+        maxTotal: 50
+```
+- 创建缓存空间并使用
+```java
+@Service
+public class SMSCodeServiceImpl implements SMSCodeService {
+
+    // 创建缓存空间
+    @CreateCache(area = "sms" , name = "smsCache",expire = 360,timeUnit = TimeUnit.SECONDS)
+    private Cache<String,String> jetCache;
+
+    @Override
+    public String sendCodeToSMS(String tele) {
+        // 生成验证码
+        String code = CodeUtil.generator(tele);
+        jetCache.put(tele,code);
+        return code;
+    }
+
+    @Override
+    public boolean checkCode(SMSCode smsCode){
+        String CacheCode = jetCache.get(smsCode.getTele());
+        return smsCode.getCode().equals(CacheCode);
+    }
+}
+```

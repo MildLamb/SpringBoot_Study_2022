@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/test?useUnicode=yes&characterEncoding=UTF-8&useSSL=false&serverTimezone=UTC
+    username: root
+    password: W2kindred
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+
+
+# jetcacahe\u914D\u7F6E
+jetcache:
+  remote:
+    default:
+      type: redis
+      host: 150.158.46.233
+      port: 6379
+      password: mildlambW2kindredwildwolfW2snowgnar
+      poolConfig:
+        maxTotal: 50
+
+    sms:
+      type: redis
+      host: 150.158.46.233
+      port: 6379
+      password: mildlambW2kindredwildwolfW2snowgnar
+      poolConfig:
+        maxTotal: 50
