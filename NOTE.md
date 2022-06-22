@@ -1186,6 +1186,14 @@ public class Springboot17JetcacheApplication {
 ```yaml
 # jetcacahe配置
 jetcache:
+  # 本地
+  local:
+  default:
+    type: linkedhashmap
+    # 必配项 key转换器
+    keyConvertor: fastjson
+  
+  # 远程
   remote:
     default:
       type: redis
@@ -1208,10 +1216,14 @@ jetcache:
 @Service
 public class SMSCodeServiceImpl implements SMSCodeService {
 
-    // 创建缓存空间
-    @CreateCache(area = "sms" , name = "smsCache",expire = 360,timeUnit = TimeUnit.SECONDS)
-    private Cache<String,String> jetCache;
+  // 创建缓存空间（远程）
+//    @CreateCache(area = "sms" , name = "smsCache",expire = 360,timeUnit = TimeUnit.SECONDS,cacheType = CacheType.REMOTE)
+//    private Cache<String,String> jetCache;
 
+    // 创建缓存空间（本地）
+    @CreateCache(name = "smsCache",expire = 360,timeUnit = TimeUnit.SECONDS,cacheType = CacheType.LOCAL)
+    private Cache<String,String> jetCache;
+  
     @Override
     public String sendCodeToSMS(String tele) {
         // 生成验证码
@@ -1226,4 +1238,67 @@ public class SMSCodeServiceImpl implements SMSCodeService {
         return smsCode.getCode().equals(CacheCode);
     }
 }
+```
+
+## jetcache启用方法注解
+- 启动类开启方法注解缓存开关
+```java
+@SpringBootApplication
+// jetcacahe启用缓存的主开关
+@EnableCreateCacheAnnotation
+// 开启方法缓存注解的开关
+@EnableMethodCache(basePackages = {"com.mildlamb"})
+public class Springboot17JetcacheApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Springboot17JetcacheApplication.class, args);
+    }
+
+}
+```
+- 使用方法缓存注解
+```java
+    // 启用方法缓存
+    @Cached(name = "roles_",key = "#rid",expire = 360,timeUnit = TimeUnit.SECONDS,cacheType = CacheType.REMOTE)
+    // 刷新缓存 重新查询重新缓存  时间要考虑清楚
+    @CacheRefresh(refresh = 10,timeUnit = TimeUnit.SECONDS)
+    public Role getRoleById(Integer rid) {
+        return roleDao.selectById(rid);
+    }
+    
+    // 执行更新操作时，更新缓存
+    // 缓存哪个缓存空间   键   值
+    @CacheUpdate(name = "roles_",key = "#role.id",value = "#role")
+    public boolean updateRole(Role role) {
+        return roleDao.updateById(role) > 0;
+    }
+    
+    // 执行删除操作时，删除缓存
+    @CacheInvalidate(name = "roles_",key = "#id")
+    public boolean deleteRole(Integer id) {
+        return roleDao.deleteById(id) > 0;
+    }
+```
+- 方法缓存要求：缓存的对象必须保证是序列化的
+```java
+public class Role implements Serializable {
+}
+```
+- 配置中声明，键转换器，转码后类型和解码后类型
+```yaml
+# jetcacahe配置
+jetcache:
+  # 每过一分钟向控制台输出一次统计数据
+  statIntervalMinutes: 1
+
+  remote:
+    default:
+      type: redis
+      host: XXX.XXX.XXX.XXX
+      port: 6379
+      password: myredispwd
+      # 指定键转换器，转码后类型和解码后类型
+      keyConvertor: fastjson
+      valueEncode: java
+      valueDecode: java
 ```

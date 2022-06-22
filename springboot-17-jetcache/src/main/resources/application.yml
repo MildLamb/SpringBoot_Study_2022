@@ -17,19 +17,31 @@ mybatis-plus:
 
 # jetcacahe\u914D\u7F6E
 jetcache:
+  # \u6BCF\u8FC7\u4E00\u5206\u949F\u5411\u63A7\u5236\u53F0\u8F93\u51FA\u4E00\u6B21\u7EDF\u8BA1\u6570\u636E
+  statIntervalMinutes: 1
+  local:
+    default:
+      type: linkedhashmap
+      # \u5FC5\u914D\u9879 key\u8F6C\u6362\u5668
+      keyConvertor: fastjson
+
+
   remote:
     default:
       type: redis
-      host: 150.158.46.233
+      host: xxx.xxx.xxx.xxx
       port: 6379
-      password: mildlambW2kindredwildwolfW2snowgnar
+      password: myredispwd
+      keyConvertor: fastjson
+      valueEncode: java
+      valueDecode: java
       poolConfig:
         maxTotal: 50
-
-    sms:
-      type: redis
-      host: 150.158.46.233
-      port: 6379
-      password: mildlambW2kindredwildwolfW2snowgnar
-      poolConfig:
-        maxTotal: 50
+#
+#    sms:
+#      type: redis
+#      host: xxx.xxx.xxx.xxx
+#      port: 6379
+#      password: myredispwd
+#      poolConfig:
+#        maxTotal: 50

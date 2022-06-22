@@ -1,6 +1,7 @@
 package com.mildlamb.service.impl;
 
 import com.alicp.jetcache.Cache;
+import com.alicp.jetcache.anno.CacheType;
 import com.alicp.jetcache.anno.CreateCache;
 import com.mildlamb.pojo.SMSCode;
 import com.mildlamb.service.SMSCodeService;
@@ -12,8 +13,12 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class SMSCodeServiceImpl implements SMSCodeService {
 
-    // 创建缓存空间
-    @CreateCache(area = "sms" , name = "smsCache",expire = 360,timeUnit = TimeUnit.SECONDS)
+    // 创建缓存空间（远程）
+//    @CreateCache(area = "sms" , name = "smsCache",expire = 360,timeUnit = TimeUnit.SECONDS,cacheType = CacheType.REMOTE)
+//    private Cache<String,String> jetCache;
+
+    // 创建缓存空间（本地）
+    @CreateCache(name = "smsCache",expire = 360,timeUnit = TimeUnit.SECONDS,cacheType = CacheType.LOCAL)
     private Cache<String,String> jetCache;
 
     @Override

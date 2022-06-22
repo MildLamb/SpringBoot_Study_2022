@@ -30,6 +30,12 @@ public class RoleController {
         return roleService.saveRole(role);
     }
 
+    @PostMapping("/update/{rid}/{rname}/{rage}")
+    public boolean updateRole(@PathVariable("rid") Integer id,@PathVariable("rname") String name,@PathVariable("rage") Integer age){
+        Role role = new Role(id,name,age);
+        return roleService.updateRole(role);
+    }
+
     @GetMapping("/del/{rid}")
     public boolean delRole(@PathVariable("rid") Integer id){
         return roleService.deleteRole(id);
