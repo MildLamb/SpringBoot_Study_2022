@@ -1,6 +1,5 @@
 spring:
   redis:
-    host: 150.158.46.233
+    host: XXX.XXX.XXX.XXX
     port: 6379
-    password: mildlambW2kindredwildwolfW2snowgnar
-    lettuce:
+    password: myredispwd
