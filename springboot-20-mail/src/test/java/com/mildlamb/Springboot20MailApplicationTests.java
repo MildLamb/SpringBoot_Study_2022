@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.mail.MessagingException;
+
 @SpringBootTest
 class Springboot20MailApplicationTests {
 
@@ -12,7 +14,7 @@ class Springboot20MailApplicationTests {
     private SendMailService mailService;
 
     @Test
-    void contextLoads() {
+    void contextLoads() throws MessagingException {
         mailService.sendMail();
     }
 

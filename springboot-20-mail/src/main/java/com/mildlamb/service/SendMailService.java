@@ -1,5 +1,7 @@
 package com.mildlamb.service;
 
+import javax.mail.MessagingException;
+
 public interface SendMailService {
-    void sendMail();
+    void sendMail() throws MessagingException;
 }

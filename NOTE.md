@@ -1494,7 +1494,7 @@ public class MyTask {
 spring:
   mail:
     username: **********@qq.com
-    password: geczouqgqocrfaei
+    password: ************
     host: smtp.qq.com
 ```
 - 编写邮件设置邮件任务
@@ -1532,3 +1532,51 @@ public class SendMailServiceImpl implements SendMailService {
     }
 }
 ```
+- 带附件和html结构解析的邮件
+```java
+    @Override
+    public void sendMail(){
+        try {
+            // 创建邮件消息容器(高端版)
+            MimeMessage message = mailSender.createMimeMessage();
+            // 设置邮件消息(第二个参数表示允许多部件，附件也是部件的一种)
+            MimeMessageHelper messageHelper = new MimeMessageHelper(message,true);
+            messageHelper.setFrom(mailFrom+"(温柔小羊)");
+            messageHelper.setTo(mailTo);
+            messageHelper.setSubject(mailTitle);
+            // 第二个参数表示是否支持html解析
+            messageHelper.setText(mailText,true);
+
+            // 添加附件
+            File file = new File("C:\\Users\\MildLamb\\Pictures\\Kindred_83776140.png");
+            messageHelper.addAttachment("小羔羊.png",file);
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+```
+
+<hr>
+
+# 消息
+- JMS(Java Message Service)：一个规范，等同于JDBC规范，提供了与消息服务相关的API接口
+  - JMS消息模型
+    - peer-2-peer：点对点模型，消息发送到一个队列中，队列保存消息。队列的消息只能被一个消费者消费，或超时
+    - publish-subscribe：发布订阅模型，消息可以被多个消费者消费，生产者和消费者完全独立，不要要感知对方存在
+  - JMS消息种类：
+    - TextMessage
+    - MapMessage
+    - BytesMessage(最常用)
+    - StreamMessage
+    - ObjectMessage
+- AMQP(advanced message queuing protocol)：一种协议(高级消息队列协议，也是消息代理规范)，规范了JMS
+  - 优点：具有跨平台，服务器提供商，生产者，消费者可以使用不同的语言来实现
+  - AMQP消息模型
+    - direct exchange
+    - fanout exchange
+    - topic exchange
+    - headers exchange
+    - system exchange
+  - AMQP消息种类：byte[]
