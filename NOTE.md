@@ -1404,3 +1404,131 @@ public class SMSCodeServiceImpl implements SMSCodeService {
     }
 }
 ```
+
+<hr>
+
+# 定时任务
+## Springboot整合Quartz
+- 相关概念
+  - 工作(job)：用于定义具体执行的工作
+  - 工作明细(JobDetail)：用于描述定时工作相关的信息
+  - 触发器(Trigger)：用于描述触发工作的规则，常用cron表达式定义规则
+  - 调度器(Scheduler)：描述了工作明细与触发器的对应关系
+
+- 导入Springboot整合Quartz的坐标
+```xml
+<!-- Quartz -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-quartz</artifactId>
+</dependency>
+```
+- 定义具体要执行的任务，继承QuartzJobBean
+```java
+public class MyQuartz extends QuartzJobBean {
+    @Override
+    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+        System.out.println("千珏绝绝子...");
+    }
+}
+```
+- 定义工作明细与触发器，并绑定对应关系
+```java
+@Configuration
+public class QuartzConfig {
+    // 工作明细
+    @Bean
+    public JobDetail jobDetail(){
+        // 绑定具体的工作
+        return JobBuilder.newJob(MyQuartz.class).storeDurably().build();
+    }
+
+    // 触发器
+    @Bean
+    public Trigger jobTrigger(){
+        ScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule("0/10 * * * * ?");
+        // 绑定对应的工作明细
+        return TriggerBuilder.newTrigger().forJob(jobDetail()).withSchedule(scheduleBuilder).build();
+    }
+}
+```
+
+## Springboot Task
+- 启动类开启定时任务开关 @EnableScheduling
+```java
+@SpringBootApplication
+// 开启定时任务功能
+@EnableScheduling
+public class Springboot19TaskApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Springboot19TaskApplication.class, args);
+    }
+
+}
+```
+- 定时任务上添加 @Scheduled
+```java
+@Component
+public class MyTask {
+    @Scheduled(cron = "0/5 * * * * ?")
+    public void doTask(){
+        System.out.println(Thread.currentThread().getName() + " : 千青灵花王玉瓷间");
+    }
+}
+```
+
+<hr>
+
+# 发送简单邮件
+- 导入发送邮件依赖
+```xml
+<!-- JavaMail -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-mail</artifactId>
+</dependency>
+```
+- 编写配置
+```yaml
+spring:
+  mail:
+    username: **********@qq.com
+    password: geczouqgqocrfaei
+    host: smtp.qq.com
+```
+- 编写邮件设置邮件任务
+```java
+@Service
+public class SendMailServiceImpl implements SendMailService {
+
+    @Resource
+    private JavaMailSender mailSender;
+
+    // 发送人
+    private String mailFrom = "***@qq.com";
+    // 接收人
+    private String mailTo = "***@qq.com";
+    // 标题
+    private String mailTitle = "千青灵花王玉瓷间";
+    // 正文
+//    private String mailText = "如果天空不亮，那就摸黑生活;如果发出声音是危险的，那就保持沉默；如果" +
+//            "自觉无力发光，那就不必去照亮他人。但是，不要习惯了黑暗就为黑暗辩护，不要为了自己的苟且洋洋得意，" +
+//            "不要嘲讽那些比自己更勇敢，更有热量的人们。我们可以卑微如尘土，但不可以扭曲如蛆虫。";
+
+    private String mailText = "拥抱生命便意味着接受死亡";
+
+    @Override
+    public void sendMail() {
+        // 创建邮件消息容器
+        SimpleMailMessage message = new SimpleMailMessage();
+        // 设置邮件消息
+        message.setFrom(mailFrom+"(MildLamb)");
+        message.setTo(mailTo);
+        message.setSubject(mailTitle);
+        message.setText(mailText);
+
+        mailSender.send(message);
+    }
+}
+```

@@ -1,0 +1,5 @@
+spring:
+  mail:
+    username: ***@qq.com
+    password: ***
+    host: smtp.qq.com
