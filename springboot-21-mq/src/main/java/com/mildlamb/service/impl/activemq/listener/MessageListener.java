@@ -4,7 +4,7 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class MessageListener {
     // 监听消息队列中是否有消息，有消息就进行处理
 

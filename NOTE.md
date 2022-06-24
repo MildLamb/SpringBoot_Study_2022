@@ -1669,3 +1669,101 @@ public class MessageListener {
     }
 }
 ```
+
+## Springboot整合RabbitMQ
+- 导入依赖
+```xml
+<!-- rabbitmq -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-amqp</artifactId>
+</dependency>
+```
+- 配置RabbitMQ
+```yaml
+spring:
+  # rabbitmq配置
+  rabbitmq:
+    host: localhost
+    port: 5672
+```
+- 配置类中创建消息队列，交换机，以及交换机和消息队列的绑定
+```java
+@Configuration
+public class RabbitmqConfig {
+    // 创建存放消息的消息队列
+    @Bean
+    public Queue directQueue(){
+        // durable：是否持久化，默认true
+        // exclusive：是否当前连接专用，默认false，即连接关闭后队列即被删除
+        // autoDelete：是否自动删除，当生产者和消费者不再使用此队列时，自动删除
+        return new Queue("direct_queue",true,false,false);
+    }
+
+    // 创建交换机
+    @Bean
+    public DirectExchange directExchange(){
+        return new DirectExchange("directExchange");
+    }
+
+    // 完成交换机和消息队列间的绑定
+    @Bean
+    public Binding bindingDirect(){
+        return BindingBuilder.bind(directQueue()).to(directExchange()).with("direct");
+    }
+}
+```
+- 生产消息，将消息给交换机
+```java
+@Service
+public class MessageServiceRabbitmqDirectImpl implements MessageService {
+
+    @Resource
+    private AmqpTemplate amqpTemplate;
+
+    @Override
+    public void sendMessage(String id) {
+        System.out.println("待发送短信的订单已纳入处理队列(rabbitmq direct)，id：" + id);
+        // 交换机名称     routing key     发送的消息
+        amqpTemplate.convertAndSend("directExchange","direct",id);
+    }
+}
+```
+- 消费者监听消息队列中的消息
+```java
+@Component
+public class MessageListener {
+    @RabbitListener(queues = {"direct_queue"})
+    public void receive(String doneId){
+        System.out.println("RabbitMQ已监听到消息队列中的消息，下面开始处理，已完成短信发送业务，id：" + doneId);
+    }
+}
+```
+
+- 另一种消息分发模式(Topic模式)
+```java
+@Configuration
+public class RabbitmqConfig_Topic {
+    // 创建存放消息的消息队列
+    @Bean
+    public Queue topicQueue(){
+        return new Queue("topic_queue");
+    }
+    
+    // 创建交换机
+    @Bean
+    public TopicExchange topicExchange(){
+        return new TopicExchange("topicExchange");
+    }
+
+    // 完成交换机和消息队列间的绑定
+    /*
+        *号：用来匹配一个单词，且单词是必须出现的，1个或多个
+        #号：用来表示任意数，0个或多个
+     */
+    @Bean
+    public Binding bindingtopic(){
+        return BindingBuilder.bind(topicQueue()).to(topicExchange()).with("topic.*.id");
+    }
+}
+```
