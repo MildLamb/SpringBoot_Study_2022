@@ -1,0 +1,10 @@
+spring:
+  activemq:
+    broker-url: tcp://localhost:61616
+  # 设置消息存放的位置
+  jms:
+    template:
+      default-destination: mildlamb
+
+    # 开启发布订阅模式
+    pub-sub-domain: true

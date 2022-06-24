@@ -1580,3 +1580,92 @@ public class SendMailServiceImpl implements SendMailService {
     - headers exchange
     - system exchange
   - AMQP消息种类：byte[]
+
+## Springboot整合ActiveMQ
+- 导入依赖
+```xml
+<!-- activemq -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-activemq</artifactId>
+</dependency>
+```
+- 进行基础配置
+```yaml
+spring:
+  activemq:
+    broker-url: tcp://localhost:61616
+  # 设置消息存放的位置
+  jms:
+    template:
+      default-destination: mildlamb
+
+    # 开启发布订阅模式
+    pub-sub-domain: true
+```
+- 创建ActiveMQ配置类
+```java
+@Configuration
+public class ActiveMqConfig {
+    @Bean
+    ConnectionFactory connectionFactory() {
+        return new ActiveMQConnectionFactory();
+    }
+
+    @Bean
+    JmsTemplate jmsTemplate(ConnectionFactory connectionFactory) {
+        JmsTemplate jmsTemplate = new JmsTemplate(connectionFactory);
+//        jmsTemplate.setPriority(999);
+        return jmsTemplate;
+    }
+
+    @Bean(value = "jmsMessagingTemplate")
+    JmsMessagingTemplate jmsMessagingTemplate(JmsTemplate jmsTemplate) {
+        JmsMessagingTemplate messagingTemplate = new JmsMessagingTemplate(jmsTemplate);
+        // 指定消息存放的队列名称，也可以在发送消息方法时传参的时候指定
+//        messagingTemplate.setDefaultDestinationName("mildlamb");
+        return messagingTemplate;
+
+    }
+}
+```
+- 生产者生产消息发送给消息队列
+```java
+@Service
+public class MessageServiceActivemqImpl implements MessageService {
+
+    @Autowired
+    private JmsMessagingTemplate messagingTemplate;
+
+    @Override
+    public void sendMessage(String id) {
+        System.out.println("待发送短信的订单已纳入处理队列，id：" + id);
+        // 向mq发送消息
+        messagingTemplate.convertAndSend("order.queue.id",id);
+    }
+
+    @Override
+    public String doMessage() {
+        String removeId = messagingTemplate.receiveAndConvert("order.queue.id",String.class);
+        System.out.println("已完成短信发送业务，id：" + removeId);
+        return removeId;
+    }
+}
+```
+- 监听者监听消息队列，进行消息消费
+```java
+@Component
+public class MessageListener {
+    // 监听消息队列中是否有消息，有消息就进行处理
+
+    // 指定监听哪个消息队列
+    @JmsListener(destination = "order.queue.id")
+
+    // 将这次消息处理后的返回值发送到新的队列中
+    @SendTo("order.other.queue.id")
+    public String receive(String doneId){
+        System.out.println("已监听到消息队列中的消息，下面开始处理，已完成短信发送业务，id：" + doneId);
+        return "new:" + doneId;
+    }
+}
+```
