@@ -1767,3 +1767,94 @@ public class RabbitmqConfig_Topic {
     }
 }
 ```
+
+<hr>
+
+# 程序监控
+- 创建监视服务端程序
+- 导入依赖
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+    <version>your springboot version</version>
+</dependency>
+```
+- 配置监控服务端
+```yaml
+server:
+  port: 8080
+```
+- 开启监控服务端开关
+```java
+@SpringBootApplication
+@EnableAdminServer
+public class Springboot22AdminServerApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(Springboot22AdminServerApplication.class, args);
+    }
+
+}
+```
+
+## actuator
+- Actuator提供了Springboot生产就绪功能，通过端点的配置与访问，获取端点信息
+- 端点描述了一组监控信息，Springboot提供了多个内置端点，也可以根据需要自定义端点信息
+- 访问当前应用的所有端点信息: /actuator
+- 访问端点的详细信息: /actuator/端点名称
+
+### actuator添加自定义info内容
+- 创建一个类实现 InfoContributor接口
+```java
+@Component
+public class InfoConfig implements InfoContributor {
+
+    @Value("${my-appInfo.artifact}")
+    private String artifact;
+
+    @Override
+    public void contribute(Info.Builder builder) {
+        builder.withDetail("runTime",System.currentTimeMillis());
+        Map infoMap = new HashMap();
+        infoMap.put("author","MildLamb");
+        infoMap.put("appName",artifact);
+        infoMap.put("特别鸣谢","温柔小羊");
+        builder.withDetails(infoMap);
+    }
+}
+```
+### 添加自定义health内容
+- 创建一个类继承 AbstractHealthIndicator
+```java
+@Component
+public class HealthConfig extends AbstractHealthIndicator {
+    @Override
+    protected void doHealthCheck(Health.Builder builder) throws Exception {
+        Map infoMap = new HashMap();
+        infoMap.put("author","MildLamb");
+        infoMap.put("特别鸣谢","温柔小羊");
+        builder.withDetails(infoMap);
+        builder.status(Status.UP);
+    }
+}
+```
+### 自定义端点
+- 创建一个类，声明为端点
+```java
+@Component
+// 声明端点，指明id，是否默认开启
+@Endpoint(id="pay",enableByDefault = true)
+public class PayPoint {
+    // 设置端点被访问时，自动调用方法
+    @ReadOperation
+    public Object getPay(){
+        System.out.println("======================");
+        System.out.println("========= pay ========");
+        System.out.println("======================");
+        Map payMap = new HashMap();
+        payMap.put("level 5",300);
+        return payMap;
+    }
+}
+```

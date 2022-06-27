@@ -5,13 +5,22 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.mildlamb.dao.BookDao;
 import com.mildlamb.pojo.Book;
 import com.mildlamb.service.BookService;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Component
+@Service
 public class BookServiceImpl implements BookService {
+
+    private Counter counter;
+
+    public BookServiceImpl(MeterRegistry meterRegistry){
+        Counter counter = meterRegistry.counter("用户操作次数: ");
+    }
+
 
     @Autowired
     private BookDao bookDao;
@@ -23,6 +32,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public Boolean updateBook(Book book) {
+
         return bookDao.updateById(book) > 0;
     }
 

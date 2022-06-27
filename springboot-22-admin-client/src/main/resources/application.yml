@@ -1,0 +1,20 @@
+server:
+  port: 8081
+
+spring:
+  boot:
+    admin:
+      client:
+        url: http://localhost:8082
+
+management:
+  endpoint:
+    health:
+      show-details: always
+    info:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    enabled-by-default: true

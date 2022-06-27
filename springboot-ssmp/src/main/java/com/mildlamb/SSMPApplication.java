@@ -13,7 +13,7 @@ public class SSMPApplication {
         SpringApplication.run(SSMPApplication.class, args);
 
         // 可以在启动boot程序时断开读取外部临时属性配置的对应入口，也就是去掉读取外部临时属性的形参
-        SpringApplication.run(SSMPApplication.class);
+//        SpringApplication.run(SSMPApplication.class);
     }
 
 }
