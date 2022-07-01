@@ -44,4 +44,10 @@ mybatis-plus:
 my-appInfo:
   artifact: @project.artifactId@
 
+# 自定义starter的配置
+tools:
+  ip:
+    count-flush: false
+    model: "detail"
+    cycle: 2
 
