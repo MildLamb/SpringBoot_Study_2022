@@ -31,9 +31,9 @@ management:
 
 
 mybatis-plus:
-  configuration:
-    # MP日志
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#  configuration:
+#    # MP日志
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
       table-prefix: tb_
@@ -48,6 +48,6 @@ my-appInfo:
 tools:
   ip:
     count-flush: false
-    model: "detail"
-    cycle: 2
+    cycle: 5
+    model: simple
 

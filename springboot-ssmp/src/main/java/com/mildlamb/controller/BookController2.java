@@ -18,8 +18,8 @@ public class BookController2 {
     @Autowired
     private IBookService iBookService;
 
-    @Autowired
-    private IpCountService ipCountService;
+//    @Autowired
+//    private IpCountService ipCountService;
 
     @GetMapping("/all")
     public ReturnData getAllBooks(){
@@ -61,8 +61,6 @@ public class BookController2 {
     public ReturnData getPageBooks(@PathVariable("current") int currentPage,@PathVariable("size") int pageSize,Book book){
 
         System.out.println("Book ==> " + book);
-
-        ipCountService.count();
 
         IPage<Book> page = iBookService.getPage(currentPage, pageSize,book);
         if (currentPage > page.getPages()){
